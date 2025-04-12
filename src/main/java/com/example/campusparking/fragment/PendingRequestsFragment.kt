@@ -1,0 +1,56 @@
+package com.example.campusparking.fragment
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.campusparking.adapter.ParkingRequestAdapter
+import com.example.campusparking.databinding.FragmentPendingRequestsBinding
+import com.example.campusparking.db.DatabaseHelper
+
+class PendingRequestsFragment : Fragment() {
+
+    private var _binding: FragmentPendingRequestsBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var dbHelper: DatabaseHelper
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentPendingRequestsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        dbHelper = DatabaseHelper(requireContext())
+
+        loadPendingRequests()
+    }
+
+    private fun loadPendingRequests() {
+        val pendingRequests = dbHelper.getPendingRequests()
+
+        if (pendingRequests.isEmpty()) {
+            binding.tvNoRequests.visibility = View.VISIBLE
+            binding.rvPendingRequests.visibility = View.GONE
+        } else {
+            binding.tvNoRequests.visibility = View.GONE
+            binding.rvPendingRequests.visibility = View.VISIBLE
+
+            val adapter = ParkingRequestAdapter(pendingRequests, dbHelper, true)
+            binding.rvPendingRequests.layoutManager = LinearLayoutManager(requireContext())
+            binding.rvPendingRequests.adapter = adapter
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}
+
